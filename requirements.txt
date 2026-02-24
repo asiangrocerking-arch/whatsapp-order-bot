@@ -1,0 +1,41 @@
+# 核心框架
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# 數據庫
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+alembic==1.12.1
+
+# WhatsApp 集成
+twilio==8.13.0
+
+# 圖片上傳
+cloudinary==1.36.0
+python-multipart==0.0.6
+
+# 認證與安全
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# HTTP 客戶端
+httpx==0.25.1
+requests==2.31.0
+
+# 數據驗證
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# 開發工具
+alembic==1.12.1
+black==23.11.0
+flake8==6.1.0
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# 模板渲染
+jinja2==3.1.2
+
+# 日誌
+loguru==0.7.2
