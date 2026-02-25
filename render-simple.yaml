@@ -1,0 +1,34 @@
+# WhatsApp 訂單機器人 - Render 部署配置（簡化版）
+# 部署步驟：
+# 1. 在 Render 創建 PostgreSQL 數據庫（手動）
+# 2. 在 Render 創建 Web 服務（手動）
+# 3. 設置環境變量
+
+# 主應用服務
+services:
+  - type: web
+    name: whatsapp-order-bot
+    env: python
+    region: singapore
+    buildCommand: |
+      pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
+    envVars:
+      - key: DATABASE_URL
+        sync: false  # 手動設置
+      - key: TWILIO_ACCOUNT_SID
+        sync: false  # 手動設置
+      - key: TWILIO_AUTH_TOKEN
+        sync: false  # 手動設置
+      - key: TWILIO_WHATSAPP_NUMBER
+        value: whatsapp:+14155238886
+      - key: CLOUDINARY_URL
+        sync: false  # 手動設置
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 8000
+    healthCheckPath: /health
+    autoDeploy: true

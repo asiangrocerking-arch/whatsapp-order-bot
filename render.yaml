@@ -29,7 +29,7 @@ services:
     autoDeploy: true
 
   # PostgreSQL 數據庫
-  - type: pgsql
+  - type: postgres
     name: whatsapp-order-bot-db
     region: singapore
     plan: free  # free, starter, standard 等
