@@ -3,43 +3,45 @@ WhatsApp 訂單機器人 - 主應用文件
 """
 
 from datetime import datetime
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import os
-from dotenv import load_dotenv
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from . import models
-from .database import engine, get_db
+from .database import engine
 from .routers import products, orders, whatsapp, admin, auth
+from .config import settings
+from .middleware import rate_limit_middleware, logging_middleware
+from .logger import log
 
-# 加載環境變量
-load_dotenv()
-
-# 創建數據庫表
-models.Base.metadata.create_all(bind=engine)
+# 創建數據庫表（生產環境應該使用 alembic）
+if settings.ENVIRONMENT == "development":
+    models.Base.metadata.create_all(bind=engine)
 
 # 創建 FastAPI 應用
 app = FastAPI(
-    title="WhatsApp 訂單機器人 API",
+    title=settings.PROJECT_NAME,
     description="一個經濟型的 WhatsApp 訂單處理系統",
     version="1.0.0",
-    docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else None,
-    redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None,
+    docs_url="/docs" if settings.DEBUG else None,
+    redoc_url="/redoc" if settings.DEBUG else None,
 )
 
 # 配置 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if os.getenv("ENVIRONMENT") == "development" else [
-        "https://your-frontend-domain.com"
-    ],
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 添加中間件
+app.add_middleware(BaseHTTPMiddleware, dispatch=rate_limit_middleware)
+app.add_middleware(BaseHTTPMiddleware, dispatch=logging_middleware)
 
 # 掛載靜態文件（用於管理界面）
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -48,11 +50,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # 包含路由
-app.include_router(products.router)
-app.include_router(orders.router)
-app.include_router(whatsapp.router)
-app.include_router(auth.router)
-app.include_router(admin.router)
+app.include_router(products.router, prefix=settings.API_V1_STR)
+app.include_router(orders.router, prefix=settings.API_V1_STR)
+app.include_router(whatsapp.router)  # webhook 保持原路徑
+app.include_router(auth.router, prefix=settings.API_V1_STR)
+app.include_router(admin.router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")
@@ -61,14 +63,14 @@ async def root():
     根端點，返回 API 信息
     """
     return {
-        "message": "WhatsApp 訂單機器人 API",
+        "message": settings.PROJECT_NAME,
         "version": "1.0.0",
-        "docs": "/docs",
+        "docs": "/docs" if settings.DEBUG else None,
         "endpoints": {
-            "products": "/products",
-            "orders": "/orders",
+            "products": f"{settings.API_V1_STR}/products",
+            "orders": f"{settings.API_V1_STR}/orders",
             "whatsapp_webhook": "/webhook/whatsapp",
-            "admin": "/admin"
+            "admin": f"{settings.API_V1_STR}/admin"
         }
     }
 
@@ -77,8 +79,14 @@ async def root():
 async def health_check():
     """
     健康檢查端點
+    返回服務狀態和版本信息
     """
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "version": "1.0.0",
+        "environment": settings.ENVIRONMENT
+    }
 
 
 @app.get("/config")
@@ -86,33 +94,62 @@ async def get_config():
     """
     獲取當前配置（僅開發環境）
     """
-    if os.getenv("ENVIRONMENT") == "production":
+    if settings.ENVIRONMENT == "production":
         raise HTTPException(status_code=403, detail="生產環境不可訪問")
     
     return {
-        "environment": os.getenv("ENVIRONMENT", "development"),
-        "database_url": "***" if os.getenv("DATABASE_URL") else "Not set",
-        "twilio_account_sid": "***" if os.getenv("TWILIO_ACCOUNT_SID") else "Not set",
-        "cloudinary_url": "***" if os.getenv("CLOUDINARY_URL") else "Not set",
+        "environment": settings.ENVIRONMENT,
+        "debug": settings.DEBUG,
+        "database_url": "***" if settings.DATABASE_URL else "Not set",
+        "twilio_account_sid": "***" if settings.TWILIO_ACCOUNT_SID else "Not set",
+        "cloudinary_url": "***" if settings.CLOUDINARY_URL else "Not set",
     }
 
 
-# 錯誤處理
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+# 全局異常處理
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    全局異常處理器
+    記錄錯誤並返回友好的錯誤信息
+    """
+    log.exception(f"Unhandled exception: {exc}")
+    
     return JSONResponse(
-        status_code=exc.status_code,
-        content={"message": exc.detail}
+        status_code=500,
+        content={
+            "error": "Internal server error",
+            "detail": str(exc) if settings.DEBUG else "服務器內部錯誤"
+        }
     )
+
+
+# 啟動事件
+@app.on_event("startup")
+async def startup_event():
+    """
+    應用啟動時執行的操作
+    """
+    log.info(f"Starting {settings.PROJECT_NAME}")
+    log.info(f"Environment: {settings.ENVIRONMENT}")
+    log.info(f"Debug mode: {settings.DEBUG}")
+
+
+# 關閉事件
+@app.on_event("shutdown")
+async def shutdown_event():
+    """
+    應用關閉時執行的操作
+    """
+    log.info(f"Shutting down {settings.PROJECT_NAME}")
 
 
 if __name__ == "__main__":
     import uvicorn
     
-    port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=port,
-        reload=os.getenv("ENVIRONMENT") == "development"
+        port=int(os.getenv("PORT", 8000)),
+        reload=settings.DEBUG
     )

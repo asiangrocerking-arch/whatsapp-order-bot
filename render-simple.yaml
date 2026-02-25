@@ -1,14 +1,9 @@
-# WhatsApp 訂單機器人 - Render 部署配置（簡化版）
-# 部署步驟：
-# 1. 在 Render 創建 PostgreSQL 數據庫（手動）
-# 2. 在 Render 創建 Web 服務（手動）
-# 3. 設置環境變量
-
-# 主應用服務
+# WhatsApp 訂單機器人 - Render 部署配置
 services:
   - type: web
     name: whatsapp-order-bot
     env: python
+    pythonVersion: 3.11.6  # 指定 Python 版本
     region: singapore
     buildCommand: |
       pip install -r requirements.txt
@@ -32,3 +27,12 @@ services:
         value: 8000
     healthCheckPath: /health
     autoDeploy: true
+    disk:
+      name: whatsapp-bot-data
+      mountPath: /data
+      sizeGB: 1
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+      targetMemoryPercent: 80
+      targetCPUPercent: 80
