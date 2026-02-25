@@ -1,16 +1,17 @@
 databases:
-  # PostgreSQL 数据库
+  # PostgreSQL 数据库 (免费计划)
   - name: whatsapp-bot-db
-    region: singapore
-    plan: free
+    region: singapore  # 新加坡区域
+    plan: free  # 使用免费计划
     ipAllowList: []  # 允许所有IP访问
 
 services:
-  # Web服务
+  # Web服务 (免费计划)
   - type: web
     name: whatsapp-order-bot
     env: python
     region: singapore
+    plan: free  # 使用免费计划
     buildCommand: pip install -r requirements.txt
     startCommand: |
       alembic upgrade head
@@ -35,13 +36,4 @@ services:
       - key: PORT
         value: 8000
     autoDeploy: true
-    disk:
-      name: whatsapp-bot-data
-      mountPath: /data
-      sizeGB: 1
     healthCheckPath: /health
-    scaling:
-      minInstances: 1
-      maxInstances: 3  # 修正：最大实例数必须大于最小实例数
-      targetMemoryPercent: 80
-      targetCPUPercent: 80
