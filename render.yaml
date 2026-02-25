@@ -1,28 +1,26 @@
 databases:
-  # PostgreSQL 数据库 (免费计划)
   - name: whatsapp-bot-db
     region: singapore
     plan: free
-    ipAllowList: []  # 允许所有IP访问
+    ipAllowList: []
 
 services:
-  # Web服务 (免费计划)
   - type: web
     name: whatsapp-order-bot
     env: python
-    pythonVersion: 3.11.8  # 指定稳定的 Python 版本
+    pythonVersion: 3.11.8
     region: singapore
     plan: free
     buildCommand: |
-      python -m pip install --upgrade pip wheel setuptools
-      pip install --no-cache-dir -r requirements.txt
-      # 预处理数据库迁移
-      PYTHONPATH=$PYTHONPATH:/opt/render/project/src alembic revision --autogenerate -m "initial"
+      # 更新基础工具
+      python -m pip install --upgrade pip setuptools wheel
+      # 安装依赖（让 pip 自动解决版本问题）
+      pip install -r requirements.txt
     startCommand: |
       # 运行数据库迁移
-      PYTHONPATH=$PYTHONPATH:/opt/render/project/src alembic upgrade head
+      alembic upgrade head
       # 启动应用
-      PYTHONPATH=$PYTHONPATH:/opt/render/project/src uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --loop uvloop --http httptools
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -40,24 +38,11 @@ services:
         generateValue: true
       - key: ENVIRONMENT
         value: production
-      - key: PORT
-        value: 8000
       - key: PYTHON_VERSION
         value: 3.11.8
       - key: PYTHONPATH
         value: /opt/render/project/src
       - key: PYTHONUNBUFFERED
         value: "true"
-      - key: PIP_CACHE_DIR
-        value: /opt/render/project/.pip_cache
-      # SQLAlchemy配置
-      - key: SQLALCHEMY_POOL_SIZE
-        value: "5"
-      - key: SQLALCHEMY_MAX_OVERFLOW
-        value: "2"
-      - key: SQLALCHEMY_POOL_TIMEOUT
-        value: "30"
-      - key: SQLALCHEMY_POOL_RECYCLE
-        value: "1800"
     autoDeploy: true
     healthCheckPath: /health
