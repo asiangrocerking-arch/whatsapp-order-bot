@@ -8,7 +8,7 @@ python-multipart==0.0.6
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.11
 alembic==1.12.1
-greenlet==3.0.3
+greenlet==3.3.2  # 更新到最新版本
 
 # WhatsApp 集成
 twilio==8.13.0
