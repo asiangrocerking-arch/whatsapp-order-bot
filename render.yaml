@@ -1,9 +1,9 @@
 databases:
   # PostgreSQL 数据库 (免费计划)
   - name: whatsapp-bot-db
-    region: singapore  # 新加坡区域
-    plan: free  # 使用免费计划
-    ipAllowList: []  # 允许所有IP访问
+    region: singapore
+    plan: free
+    ipAllowList: []
 
 services:
   # Web服务 (免费计划)
@@ -11,8 +11,10 @@ services:
     name: whatsapp-order-bot
     env: python
     region: singapore
-    plan: free  # 使用免费计划
-    buildCommand: pip install -r requirements.txt
+    plan: free
+    buildCommand: |
+      pip install --upgrade pip
+      pip install --only-binary :all: -r requirements.txt
     startCommand: |
       alembic upgrade head
       uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -35,5 +37,7 @@ services:
         value: production
       - key: PORT
         value: 8000
+      - key: PYTHONUNBUFFERED
+        value: "true"
     autoDeploy: true
     healthCheckPath: /health

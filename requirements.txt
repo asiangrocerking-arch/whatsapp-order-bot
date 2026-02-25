@@ -1,58 +1,37 @@
 # 核心框架
-fastapi~=0.104.1
-uvicorn[standard]~=0.24.0
-gunicorn~=21.2.0
-python-multipart~=0.0.6
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+gunicorn==21.2.0
+python-multipart==0.0.6
 
-# 數據庫
-sqlalchemy~=2.0.23
-psycopg2-binary~=2.9.9
-alembic~=1.12.1
+# 数据库
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+alembic==1.12.1
 
 # WhatsApp 集成
-twilio~=8.13.0
+twilio==8.13.0
 
-# 圖片上傳
-cloudinary~=1.36.0
+# 图片上传
+cloudinary==1.36.0
 
-# 認證與安全
-python-jose[cryptography]~=3.3.0
-passlib[bcrypt]~=1.7.4
-python-dotenv~=1.0.0
+# 认证与安全
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
 
-# HTTP 客戶端
-httpx~=0.25.1
-requests~=2.31.0
+# HTTP 客户端
+httpx==0.25.1
+requests==2.31.0
 
-# 數據驗證
-pydantic~=2.5.0
-pydantic-settings~=2.1.0
-
-# 序列化
-orjson~=3.9.10  # 更快的 JSON 處理
-
-# 開發工具
-black~=23.11.0
-flake8~=6.1.0
-pytest~=7.4.3
-pytest-asyncio~=0.21.1
-pytest-cov~=4.1.0
-
-# 監控與日誌
-prometheus-fastapi-instrumentator~=6.1.0
-loguru~=0.7.2
+# 数据验证 (预编译版本)
+pydantic==2.5.0
+pydantic-settings==2.1.0
+pydantic-core==2.14.3
+typing-extensions==4.9.0
 
 # 模板渲染
-jinja2~=3.1.2
+jinja2==3.1.2
 
-# 性能優化
-ujson~=5.8.0  # 更快的 JSON 序列化
-uvloop~=0.19.0  # 更快的事件循環（僅用於 Unix 系統）
-asyncpg~=0.29.0  # 異步 PostgreSQL 驅動
-
-# 緩存
-cachetools~=5.3.2
-
-# 工具
-python-dateutil~=2.8.2
-pytz~=2023.3.post1
+# 日志
+loguru==0.7.2
