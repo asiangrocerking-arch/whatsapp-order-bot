@@ -1,19 +1,12 @@
-services:
-  # PostgreSQL 數據庫
-  - type: pserv
-    name: whatsapp-bot-db
-    plan: starter # 免費計劃，1GB存儲
+databases:
+  # PostgreSQL 数据库
+  - name: whatsapp-bot-db
     region: singapore
-    env: postgres
-    repo: https://github.com/render-examples/postgres-example
-    branch: main
-    autoDeploy: false # 數據庫不需要自動部署
-    disk:
-      name: pg-data
-      mountPath: /var/lib/postgresql/data
-      sizeGB: 1
+    plan: free
+    ipAllowList: []  # 允许所有IP访问
 
-  # Web服務
+services:
+  # Web服务
   - type: web
     name: whatsapp-order-bot
     env: python
@@ -24,10 +17,9 @@ services:
       uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: pserv
+        fromDatabase:
           name: whatsapp-bot-db
-          property: connectionString # Render會自動注入數據庫連接串
+          property: connectionString
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
@@ -50,6 +42,6 @@ services:
     healthCheckPath: /health
     scaling:
       minInstances: 1
-      maxInstances: 1
+      maxInstances: 3  # 修正：最大实例数必须大于最小实例数
       targetMemoryPercent: 80
       targetCPUPercent: 80
