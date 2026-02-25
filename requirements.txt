@@ -13,7 +13,7 @@ alembic==1.12.1
 twilio==8.13.0
 
 # 图片上传
-cloudinary==1.44.1  # 更新到最新版本
+cloudinary==1.44.1
 
 # 认证与安全
 python-jose[cryptography]==3.3.0
@@ -24,11 +24,10 @@ python-dotenv==1.0.0
 httpx==0.25.1
 requests==2.31.0
 
-# 数据验证 (预编译版本)
-pydantic==2.5.0
-pydantic-settings==2.1.0
-pydantic-core==2.14.3
-typing-extensions==4.9.0
+# 数据验证 (最新稳定版)
+pydantic>=2.5.0,<3.0.0
+pydantic-settings>=2.1.0,<3.0.0
+typing-extensions>=4.9.0,<5.0.0
 
 # 模板渲染
 jinja2==3.1.2
