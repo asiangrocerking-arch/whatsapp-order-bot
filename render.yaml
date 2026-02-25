@@ -3,7 +3,7 @@ databases:
   - name: whatsapp-bot-db
     region: singapore
     plan: free
-    ipAllowList: []
+    ipAllowList: []  # 允许所有IP访问
 
 services:
   # Web服务 (免费计划)
@@ -16,9 +16,13 @@ services:
     buildCommand: |
       python -m pip install --upgrade pip wheel setuptools
       pip install --no-cache-dir -r requirements.txt
+      # 预处理数据库迁移
+      PYTHONPATH=$PYTHONPATH:/opt/render/project/src alembic revision --autogenerate -m "initial"
     startCommand: |
-      alembic upgrade head
-      uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --loop uvloop --http httptools
+      # 运行数据库迁移
+      PYTHONPATH=$PYTHONPATH:/opt/render/project/src alembic upgrade head
+      # 启动应用
+      PYTHONPATH=$PYTHONPATH:/opt/render/project/src uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --loop uvloop --http httptools
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -46,5 +50,14 @@ services:
         value: "true"
       - key: PIP_CACHE_DIR
         value: /opt/render/project/.pip_cache
+      # SQLAlchemy配置
+      - key: SQLALCHEMY_POOL_SIZE
+        value: "5"
+      - key: SQLALCHEMY_MAX_OVERFLOW
+        value: "2"
+      - key: SQLALCHEMY_POOL_TIMEOUT
+        value: "30"
+      - key: SQLALCHEMY_POOL_RECYCLE
+        value: "1800"
     autoDeploy: true
     healthCheckPath: /health

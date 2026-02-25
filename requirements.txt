@@ -8,6 +8,7 @@ python-multipart==0.0.6
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.11
 alembic==1.12.1
+greenlet==3.0.3
 
 # WhatsApp 集成
 twilio==8.13.0
@@ -27,6 +28,7 @@ requests==2.31.0
 # 数据验证
 pydantic==2.5.2
 pydantic-settings==2.1.0
+pydantic-core==2.14.5
 typing-extensions==4.9.0
 
 # 模板渲染
@@ -35,8 +37,12 @@ jinja2==3.1.2
 # 日志
 loguru==0.7.2
 
-# 明确的依赖关系
-greenlet==3.0.3
+# 性能优化
+uvloop==0.19.0
+httptools==0.6.1
+ujson==5.9.0
+
+# 其他依赖
 annotated-types==0.6.0
 anyio==4.2.0
 click==8.1.7
@@ -46,4 +52,4 @@ h11==0.14.0
 idna==3.6
 sniffio==1.3.0
 starlette==0.27.0
-pydantic_core==2.14.5
+PyJWT==2.8.0
