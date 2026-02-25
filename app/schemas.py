@@ -1,6 +1,6 @@
 """
-Pydantic 數據驗證模式
-用於 API 請求和響應
+Pydantic 数据验证模式
+用于 API 请求和响应
 """
 
 from pydantic import BaseModel, Field, HttpUrl
@@ -8,7 +8,7 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 
-# 商品相關模式
+# 商品相关模式
 class ProductBase(BaseModel):
     name: str = Field(..., max_length=200)
     description: Optional[str] = None
@@ -39,12 +39,12 @@ class Product(ProductBase):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode
 
 
-# 訂單相關模式
+# 订单相关模式
 class OrderBase(BaseModel):
-    customer_whatsapp: str = Field(..., regex=r'^\+[1-9]\d{1,14}$')
+    customer_whatsapp: str = Field(..., pattern=r'^\+[1-9]\d{1,14}$')  # 使用 pattern 替换 regex
     customer_name: Optional[str] = Field(None, max_length=100)
     product_id: int
     quantity: int = Field(default=1, ge=1)
@@ -75,12 +75,12 @@ class Order(OrderBase):
     product: Optional[Product] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode
 
 
-# WhatsApp 會話模式
+# WhatsApp 会话模式
 class WhatsAppSessionBase(BaseModel):
-    whatsapp_number: str = Field(..., regex=r'^\+[1-9]\d{1,14}$')
+    whatsapp_number: str = Field(..., pattern=r'^\+[1-9]\d{1,14}$')  # 使用 pattern 替换 regex
     session_state: str = Field(default="idle")
     session_data: Optional[Dict[str, Any]] = None
 
@@ -91,10 +91,10 @@ class WhatsAppSession(WhatsAppSessionBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode
 
 
-# 管理員相關模式
+# 管理员相关模式
 class AdminUserBase(BaseModel):
     username: str = Field(..., max_length=100)
     email: str = Field(..., max_length=200)
@@ -110,10 +110,10 @@ class AdminUser(AdminUserBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # 替换 orm_mode
 
 
-# 認證相關模式
+# 认证相关模式
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -132,7 +132,7 @@ class WhatsAppMessage(BaseModel):
     media_url: Optional[str] = None
 
 
-# API 響應模式
+# API 响应模式
 class MessageResponse(BaseModel):
     message: str
 
