@@ -10,11 +10,12 @@ services:
   - type: web
     name: whatsapp-order-bot
     env: python
+    pythonVersion: 3.11.8  # 指定稳定的 Python 版本
     region: singapore
     plan: free
     buildCommand: |
-      pip install --upgrade pip
-      pip install --only-binary :all: -r requirements.txt
+      python -m pip install --upgrade pip
+      pip install --no-cache-dir -r requirements.txt
     startCommand: |
       alembic upgrade head
       uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -37,7 +38,9 @@ services:
         value: production
       - key: PORT
         value: 8000
-      - key: PYTHONUNBUFFERED
-        value: "true"
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: PYTHONPATH
+        value: /opt/render/project/src
     autoDeploy: true
     healthCheckPath: /health
