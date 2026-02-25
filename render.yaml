@@ -18,7 +18,7 @@ services:
       pip install --no-cache-dir -r requirements.txt
     startCommand: |
       alembic upgrade head
-      uvicorn app.main:app --host 0.0.0.0 --port $PORT
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -42,5 +42,7 @@ services:
         value: 3.11.8
       - key: PYTHONPATH
         value: /opt/render/project/src
+      - key: PIP_CACHE_DIR
+        value: /opt/render/project/.pip_cache
     autoDeploy: true
     healthCheckPath: /health
