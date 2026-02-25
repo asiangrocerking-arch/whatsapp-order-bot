@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}WhatsApp 订单机器人{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-brand">WhatsApp 订单机器人</a>
+            <div class="nav-menu">
+                {% if user %}
+                <a href="/admin/products">商品管理</a>
+                <a href="/admin/orders">订单管理</a>
+                <a href="/admin/logout">登出</a>
+                {% else %}
+                <a href="/admin/login">登录</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 WhatsApp 订单机器人</p>
+        </div>
+    </footer>
+</body>
+</html>
